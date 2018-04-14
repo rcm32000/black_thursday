@@ -196,5 +196,6 @@ class SalesAnalyst
     end.reverse
     # puts (Time.now - time).round(2)
     tops
+
   end
 end
