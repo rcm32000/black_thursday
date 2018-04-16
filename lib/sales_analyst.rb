@@ -298,17 +298,35 @@ class SalesAnalyst
 
   def top_merchant_for_customer(customer_id)
     invoices = @engine.invoices.find_all_by_customer_id(customer_id)
-    invoice_items = invoices.map do |invoice|
-      unless invoice_is_pending?(invoice)
-        @engine.invoice_items.find_all_by_invoice_id(invoice.id)
+    grouped_invoices = invoices.group_by(&:merchant_id)
+    # Change hash to have quantity of items as value
+    a = grouped_invoices.map do |merch_id, invoices|
+      # Add up items for invoices
+      total_quantity = invoices.reduce(0) do |sum, invoice|
+        invoice_items = @engine.invoice_items.find_all_by_invoice_id(invoice.id)
+        # Get total quantity for array of invoice items
+        sum + invoice_items.reduce(0) do |total, invoice_item|
+          total + invoice_item.quantity
+        end
       end
-    end.flatten.compact
-    quantities = invoice_items.group_by(&:quantity)
-    max = quantities.keys.max
-    quantities[max].map do |invoice_item|
-      item = @engine.items.find_by_id(invoice_item.item_id)
-      @engine.merchants.find_by_id(item.merchant_id)
-      # binding.pry
-    end[1]
+      [merch_id, total_quantity]
+
+
+    end
+    binding.pry
+
+
+
+    # invoice_items = invoices.map do |invoice|
+    #   unless invoice_is_pending?(invoice)
+    #     @engine.invoice_items.find_all_by_invoice_id(invoice.id)
+    #   end
+    # end.flatten.compact
+    # quantities = invoice_items.group_by(&:quantity)
+    # max = quantities.keys.max
+    # quantities[max].map do |invoice_item|
+    #   item = @engine.items.find_by_id(invoice_item.item_id)
+    #   @engine.merchants.find_by_id(item.merchant_id)
+    # end[1]
   end
 end
