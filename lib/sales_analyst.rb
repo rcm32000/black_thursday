@@ -322,19 +322,28 @@ class SalesAnalyst
     invoices = one_time_buyers.find_all do |customer|
       @engine.invoices.find_all_by_customer_id(customer.id)
     end
+    # Get invoice_items from invoices of one_time_buyers
     invoice_items = invoices.map do |invoice|
       @engine.invoice_items.find_all_by_invoice_id(invoice.id)
     end.flatten.compact
-    items = invoice_items.map do |invoice_item|
-      @engine.items.find_by_id(invoice_item.item_id)
+    # Get items of invoice_items with quantity
+    items_with_quantity = invoice_items.map do |invoice_item|
+      [@engine.items.find_by_id(invoice_item.item_id), invoice_item.quantity]
     end
-    grouped_items = items.group_by(&:id)
-    quantities = grouped_items.map do |id, redundant_items|
-      [id, redundant_items.count]
-    end.to_h
+    # Group items_with_quantity by their item
+    grouped_items = items_with_quantity.group_by do |item_with_quantity|
+      item_with_quantity[0].id
+    end
+    quantities = grouped_items.map do |item, items_with_quantity|
+      if items_with_quantity[1]
+        [item, items_with_quantity[1]]
+      else
+        nil
+      end
+    end.compact
+    binding.pry
     max = quantities.values.max
     item_id = quantities.max_by { |k, v| v }
-    @engine.items.find_by_id(item_id)
-    binding.pry
+    @engine.items.find_by_id(item_id[0])
   end
 end

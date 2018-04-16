@@ -339,8 +339,7 @@ class SalesAnalystTest < Minitest::Test
     assert_instance_of Customer, actual[0]
   end
 
-  def test_it_returns_list_of_items_from_one_time_buyers
-    skip
+  def test_it_returns_top_quantity_item_of_one_time_buyers
     se = SalesEngine.from_csv(
       invoices:   './data/invoices.csv',
       invoice_items: './data/invoice_items.csv',
@@ -349,8 +348,7 @@ class SalesAnalystTest < Minitest::Test
       merchants: './data/merchants.csv'
       )
     actual = se.analyst.one_time_buyers_top_item
-    assert_instance_of Array, actual
-    assert_instance_of Item, actual[0]
-    assert_equal se.items.find_by_id(263396463), actual[0]
+    assert_instance_of Item, actual
+    assert_equal se.items.find_by_id(263396463), actual
   end
 end
