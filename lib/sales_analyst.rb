@@ -251,6 +251,7 @@ class SalesAnalyst
 
     #returns all invoice items associated with the merchant:
     invoice_items = invoices.map do |invoice|
+
       if !invoice_is_pending?(invoice)
         @engine.invoice_items.find_all_by_invoice_id(invoice.id)
       end
@@ -261,9 +262,11 @@ class SalesAnalyst
       invoice_item.quantity
     end
 
+
     max = quantities.keys.max
-    quantities[max].map do |invoice_item|
-      @engine.items.find_by_id(invoice_item.item_id)
-    end
+    quantities[max].
+    # quantities[max].map do |invoice_item|
+    #   @engine.items.find_by_id(invoice_item.item_id)
+    # end
   end
 end
