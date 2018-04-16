@@ -247,39 +247,68 @@ class SalesAnalyst
   end
 
   def most_sold_item_for_merchant(merchant_id)
-    invoices = @engine.invoices.find_all_by_merchant_id(merchant_id)
+    invoice_items = invoice_items_from_merchant(merchant_id)
+    quantities = invoice_items.group_by(&:quantity)
+    find_maximum_value(quantities)
+  end
 
-    #returns all invoice items associated with the merchant:
-    invoice_items = invoices.map do |invoice|
-      if !invoice_is_pending?(invoice)
+  def best_item_for_merchant(merchant_id)
+    invoice_items = invoice_items_from_merchant(merchant_id)
+    revenue = invoice_items.group_by do |invoice_item|
+      invoice_item.quantity * invoice_item.unit_price
+    end
+    find_maximum_value(revenue)[0]
+  end
+
+  def invoice_items_from_merchant(merchant_id)
+    invoices = @engine.invoices.find_all_by_merchant_id(merchant_id)
+    invoices.map do |invoice|
+      unless invoice_is_pending?(invoice)
         @engine.invoice_items.find_all_by_invoice_id(invoice.id)
       end
     end.flatten.compact
+  end
 
-    #groups invoice items by quantity:
-    quantities = invoice_items.group_by do |invoice_item|
-      invoice_item.quantity
-    end
-
-    max = quantities.keys.max
-    quantities[max].map do |invoice_item|
+  def find_maximum_value(amounts)
+    max = amounts.keys.max
+    amounts[max].map do |invoice_item|
       @engine.items.find_by_id(invoice_item.item_id)
     end
   end
 
-  def best_item_for_merchant(merchant_id)
-    invoices = @engine.invoices.find_all_by_merchant_id(merchant_id)
+  def top_buyers(num = 20)
+    customers_ranked_by_revenue[0..num - 1]
+  end
+
+  def customers_ranked_by_revenue
+    tops = @engine.customers.all.sort_by do |customer|
+      invoices = @engine.invoices.find_all_by_customer_id(customer.id)
+      invoices.reduce(0, &method(:revenue_for_invoice))
+    end.reverse
+    tops
+  end
+  #
+  # def elements_ranked_by_revenue(repository, find_all, )
+  #   tops = repository.all.sort_by do |customer|
+  #     invoices = @engine.invoices.find_all_by_customer_id(customer.id)
+  #     invoices.reduce(0, &method(:revenue_for_invoice))
+  #   end.reverse
+  #   tops
+  # end
+
+  def top_merchant_for_customer(customer_id)
+    invoices = @engine.invoices.find_all_by_customer_id(customer_id)
     invoice_items = invoices.map do |invoice|
-      if !invoice_is_pending?(invoice)
+      unless invoice_is_pending?(invoice)
         @engine.invoice_items.find_all_by_invoice_id(invoice.id)
       end
     end.flatten.compact
-    quantities = invoice_items.group_by do |invoice_item|
-      invoice_item.quantity * invoice_item.unit_price
-    end
+    quantities = invoice_items.group_by(&:quantity)
     max = quantities.keys.max
     quantities[max].map do |invoice_item|
-      @engine.items.find_by_id(invoice_item.item_id)
-    end[0]
+      item = @engine.items.find_by_id(invoice_item.item_id)
+      @engine.merchants.find_by_id(item.merchant_id)
+      # binding.pry
+    end[1]
   end
 end

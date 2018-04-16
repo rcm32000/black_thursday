@@ -281,4 +281,50 @@ class SalesAnalystTest < Minitest::Test
     expected2 = se.items.find_by_id(263463003)
     assert_equal expected2, actual2
   end
+
+  def test_it_can_return_top_buyers
+    se = SalesEngine.from_csv(
+      invoices:   './data/invoices.csv',
+      invoice_items: './data/invoice_items.csv',
+      customers: './data/customers.csv',
+      transactions: './data/transactions.csv'
+    )
+    actual = se.analyst.top_buyers(5)
+    assert_instance_of Array, actual
+    assert_equal 5, actual.length
+    assert_instance_of Customer, actual[0]
+    assert_equal 313, actual[0].id
+    assert_instance_of Customer, actual[-1]
+    assert_equal 478, actual[-1].id
+  end
+
+  def test_it_returns_twenty_customers_by_default
+    se = SalesEngine.from_csv(
+      invoices:   './data/invoices.csv',
+      invoice_items: './data/invoice_items.csv',
+      customers: './data/customers.csv',
+      transactions: './data/transactions.csv'
+    )
+    actual = se.analyst.top_buyers
+    assert_instance_of Array, actual
+    assert_equal 20, actual.length
+    assert_instance_of Customer, actual[0]
+    assert_equal 313, actual[0].id
+    assert_instance_of Customer, actual[-1]
+    assert_equal 250, actual[-1].id
+  end
+
+  def test_it_returns_favorite_merchant
+    se = SalesEngine.from_csv(
+      invoices:   './data/invoices.csv',
+      items:            './data/items.csv',
+      invoice_items: './data/invoice_items.csv',
+      customers: './data/customers.csv',
+      merchants: './data/merchants.csv',
+      transactions: './data/transactions.csv'
+    )
+    actual = se.analyst.top_merchant_for_customer(100)
+    assert_instance_of Merchant, actual
+    assert_equal 12336753, actual.id
+  end
 end
