@@ -8,6 +8,7 @@ class InvoiceItemRepository
   def initialize
     @elements = {}
     @invoice_ids = Hash.new{ |h, k| h[k] = [] }
+    @item_ids = Hash.new{ |h, k| h[k] = [] }
   end
 
   def build_elements_hash(elements)
@@ -15,14 +16,13 @@ class InvoiceItemRepository
       invoice_item = InvoiceItem.new(element)
       @elements[invoice_item.id] = invoice_item
       @invoice_ids[invoice_item.invoice_id] << invoice_item
+      @item_ids[invoice_item.item_id] << invoice_item
 
     end
   end
 
   def find_all_by_item_id(item_id)
-    all.find_all do |element|
-      element.item_id == item_id
-    end
+    @item_ids[item_id]
   end
 
   def create(attributes)

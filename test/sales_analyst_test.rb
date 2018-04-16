@@ -338,4 +338,19 @@ class SalesAnalystTest < Minitest::Test
     assert_equal 76, actual.length
     assert_instance_of Customer, actual[0]
   end
+
+  def test_it_returns_list_of_items_from_one_time_buyers
+    skip
+    se = SalesEngine.from_csv(
+      invoices:   './data/invoices.csv',
+      invoice_items: './data/invoice_items.csv',
+      items: './data/items.csv',
+      customers: './data/customers.csv',
+      merchants: './data/merchants.csv'
+      )
+    actual = se.analyst.one_time_buyers_top_item
+    assert_instance_of Array, actual
+    assert_instance_of Item, actual[0]
+    assert_equal se.items.find_by_id(263396463), actual[0]
+  end
 end

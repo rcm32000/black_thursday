@@ -8,6 +8,7 @@ class TransactionRepository
   def initialize
     @elements = {}
     @invoice_ids = Hash.new{ |h, k| h[k] = [] }
+    @results = Hash.new{ |h, k| h[k] = [] }
 
   end
 
@@ -16,6 +17,7 @@ class TransactionRepository
       transaction = Transaction.new(element)
       @elements[transaction.id] = transaction
       @invoice_ids[transaction.invoice_id] << transaction
+      @results[transaction.result] << transaction
     end
   end
 
@@ -26,9 +28,7 @@ class TransactionRepository
   end
 
   def find_all_by_result(result)
-    all.find_all do |element|
-      element.result == result
-    end
+    @results[result]
   end
 
   def create(attributes)

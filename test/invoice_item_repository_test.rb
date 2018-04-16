@@ -166,4 +166,8 @@ class InvoiceItemRepositoryTest < Minitest::Test
     @inv_itr.delete(1)
     assert_equal 0, @inv_itr.all.count
   end
+
+  def test_it_inspects
+    assert_instance_of String, @inv_itr.inspect
+  end
 end

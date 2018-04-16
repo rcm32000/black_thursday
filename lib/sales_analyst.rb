@@ -317,4 +317,24 @@ class SalesAnalyst
       @engine.invoices.find_all_by_customer_id(customer.id).count == 1
     end
   end
+
+  def one_time_buyers_top_item
+    invoices = one_time_buyers.find_all do |customer|
+      @engine.invoices.find_all_by_customer_id(customer.id)
+    end
+    invoice_items = invoices.map do |invoice|
+      @engine.invoice_items.find_all_by_invoice_id(invoice.id)
+    end.flatten.compact
+    items = invoice_items.map do |invoice_item|
+      @engine.items.find_by_id(invoice_item.item_id)
+    end
+    grouped_items = items.group_by(&:id)
+    quantities = grouped_items.map do |id, redundant_items|
+      [id, redundant_items.count]
+    end.to_h
+    max = quantities.values.max
+    item_id = quantities.max_by { |k, v| v }
+    @engine.items.find_by_id(item_id)
+    binding.pry
+  end
 end
