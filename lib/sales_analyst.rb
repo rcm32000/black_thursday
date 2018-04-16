@@ -248,32 +248,22 @@ class SalesAnalyst
 
   def most_sold_item_for_merchant(merchant_id)
     invoices = @engine.invoices.find_all_by_merchant_id(merchant_id)
+
+    #returns all invoice items associated with the merchant:
     invoice_items = invoices.map do |invoice|
-      @engine.invoice_items.find_all_by_invoice_id(invoice.id)
-    end.flatten
-    total = {}
-    invoice_items.map do |invoice_item|
-      if total[invoice_item.item_id] == nil
-        total[invoice_item.item_id] = invoice_item.quantity
-      else
-        total[invoice_item.item_id] + invoice_item.quantity
+
+
+      if !invoice_is_pending?(invoice)
+        @engine.invoice_items.find_all_by_invoice_id(invoice.id)
       end
+    end.flatten.compact
+
+    #groups invoice items by quantity:
+    quantities = invoice_items.group_by do |invoice_item|
+      invoice_item.quantity
     end
-    binding.pry
-    # grouped_invoice_items = invoice_items.group_by do |invoice_item|
-    #   invoice_item.item_id
-    # end
-    # quantities = Hash.new{ |h, k| h[k] = [] }*
-    # stuffs = grouped_invoice_items.map do |item_id, invoice_items|
-    #   invoice_items.reduce(0) do |sum, invoice_item|
-    #     [sum + invoice_item.quantity, item_id]
-    #   end
-    # end.to_h
-    # binding.pry
-    # max = grouped_invoice_items.values.max
-    # quantities = invoice_items.group_by do |invoice_item|
-    #   invoice_item.quantity
-    # end
+
+
     max = quantities.keys.max
     quantities[max]
     # quantities[max].map do |invoice_item|
