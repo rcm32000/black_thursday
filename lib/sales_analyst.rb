@@ -262,7 +262,24 @@ class SalesAnalyst
     end
 
     max = quantities.keys.max
-    quantities[max]
+    quantities[max].map do |invoice_item|
+      @engine.items.find_by_id(invoice_item.item_id)
+    end
+  end
 
+  def best_item_for_merchant(merchant_id)
+    invoices = @engine.invoices.find_all_by_merchant_id(merchant_id)
+    invoice_items = invoices.map do |invoice|
+      if !invoice_is_pending?(invoice)
+        @engine.invoice_items.find_all_by_invoice_id(invoice.id)
+      end
+    end.flatten.compact
+    quantities = invoice_items.group_by do |invoice_item|
+      invoice_item.quantity * invoice_item.unit_price
+    end
+    max = quantities.keys.max
+    quantities[max].map do |invoice_item|
+      @engine.items.find_by_id(invoice_item.item_id)
+    end[0]
   end
 end

@@ -266,14 +266,19 @@ class SalesAnalystTest < Minitest::Test
   end
 
   def test_it_returns_best_item_for_merchant
-    skip
     se = SalesEngine.from_csv(
       invoices:         './data/invoices.csv',
       items:            './data/items.csv',
       invoice_items:    './data/invoice_items.csv',
+      transactions:     './data/transactions.csv',
       merchants:        './data/merchants.csv'
     )
-    actual = se.analyst.best_item_for_merchant(12334189)
+    actual1 = se.analyst.best_item_for_merchant(12334189)
+    expected1 = se.items.find_by_id(263516130)
+    assert_equal expected1, actual1
 
+    actual2 = se.analyst.best_item_for_merchant(12337105)
+    expected2 = se.items.find_by_id(263463003)
+    assert_equal expected2, actual2
   end
 end
