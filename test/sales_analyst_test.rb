@@ -253,12 +253,13 @@ class SalesAnalystTest < Minitest::Test
       merchants:        './data/merchants.csv'
     )
     actual = se.analyst.most_sold_item_for_merchant(12334189)
-    # actual = se.analyst.most_sold_item_for_merchant(12334234)
+    actual1 = se.analyst.most_sold_item_for_merchant(12337105)
     assert_instance_of Array, actual
     item = se.items.find_by_id(263524984)
-    # item = se.items.find_by_id(263527404)
     assert actual.include?(item)
     assert_instance_of Item, actual.first
+    assert_instance_of 2, actual.length
+    assert_instance_of 4, actual1.length
   end
 
   def test_it_returns_best_item_for_merchant

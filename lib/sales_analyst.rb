@@ -251,12 +251,24 @@ class SalesAnalyst
     invoice_items = invoices.map do |invoice|
       @engine.invoice_items.find_all_by_invoice_id(invoice.id)
     end.flatten
-    quantities = invoice_items.group_by do |invoice_item|
-      invoice_item.quantity
+    grouped_invoice_items = invoice_items.group_by do |invoice_item|
+      invoice_item.item_id
     end
+    quantities = Hash.new{ |h, k| h[k] = [] }
+    stuffs = grouped_invoice_items.map do |item_id, invoice_items|
+      invoice_items.reduce(0) do |sum, invoice_item|
+        [sum + invoice_item.quantity, item_id]
+      end
+    end.to_h
+    # binding.pry
+    # max = grouped_invoice_items.values.max
+    # quantities = invoice_items.group_by do |invoice_item|
+    #   invoice_item.quantity
+    # end
     max = quantities.keys.max
-    quantities[max].map do |invoice_item|
-      @engine.items.find_by_id(invoice_item.item_id)
-    end
+    quantities[max].
+    # quantities[max].map do |invoice_item|
+    #   @engine.items.find_by_id(invoice_item.item_id)
+    # end
   end
 end
