@@ -327,4 +327,8 @@ class SalesAnalystTest < Minitest::Test
     assert_instance_of Merchant, actual
     assert_equal 12336753, actual.id
   end
+
+  def test_it_returns_one_time_buyers
+
+  end
 end
