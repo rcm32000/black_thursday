@@ -263,7 +263,7 @@ class SalesAnalyst
 
     max = quantities.keys.max
     quantities[max].map do |invoice_item|
-      @engine.items.find_by_id(invoice_item.item_id)
+      @engine.items.find_by_id(invoice_item.item_id) 
     end
   end
 end
