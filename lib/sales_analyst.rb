@@ -311,4 +311,10 @@ class SalesAnalyst
       end
     end
   end
+
+  def one_time_buyers
+    @engine.customers.all.find_all do |customer|
+      @engine.invoices.find_all_by_customer_id(customer.id).count == 1
+    end
+  end
 end

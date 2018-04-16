@@ -317,18 +317,25 @@ class SalesAnalystTest < Minitest::Test
   def test_it_returns_favorite_merchant
     se = SalesEngine.from_csv(
       invoices:   './data/invoices.csv',
-      items:            './data/items.csv',
       invoice_items: './data/invoice_items.csv',
       customers: './data/customers.csv',
-      merchants: './data/merchants.csv',
-      transactions: './data/transactions.csv'
-    )
+      merchants: './data/merchants.csv'
+      )
     actual = se.analyst.top_merchant_for_customer(100)
     assert_instance_of Merchant, actual
     assert_equal 12336753, actual.id
   end
 
   def test_it_returns_one_time_buyers
-
+    se = SalesEngine.from_csv(
+      invoices:   './data/invoices.csv',
+      invoice_items: './data/invoice_items.csv',
+      customers: './data/customers.csv',
+      merchants: './data/merchants.csv'
+      )
+    actual = se.analyst.one_time_buyers
+    assert_instance_of Array, actual
+    assert_equal 76, actual.length
+    assert_instance_of Customer, actual[0]
   end
 end
