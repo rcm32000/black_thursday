@@ -345,7 +345,7 @@ class SalesAnalystTest < Minitest::Test
       invoice_items: './data/invoice_items.csv',
       items: './data/items.csv',
       customers: './data/customers.csv',
-      merchants: './data/merchants.csv'
+      transactions: './data/transactions.csv'
       )
     actual = se.analyst.one_time_buyers_top_item
     assert_instance_of Item, actual

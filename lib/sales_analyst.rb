@@ -319,31 +319,25 @@ class SalesAnalyst
   end
 
   def one_time_buyers_top_item
-    invoices = one_time_buyers.find_all do |customer|
+    invoices = one_time_buyers.map do |customer|
       @engine.invoices.find_all_by_customer_id(customer.id)
-    end
+    end.flatten
     # Get invoice_items from invoices of one_time_buyers
     invoice_items = invoices.map do |invoice|
-      @engine.invoice_items.find_all_by_invoice_id(invoice.id)
-    end.flatten.compact
-    # Get items of invoice_items with quantity
-    items_with_quantity = invoice_items.map do |invoice_item|
-      [@engine.items.find_by_id(invoice_item.item_id), invoice_item.quantity]
-    end
-    # Group items_with_quantity by their item
-    grouped_items = items_with_quantity.group_by do |item_with_quantity|
-      item_with_quantity[0].id
-    end
-    quantities = grouped_items.map do |item, items_with_quantity|
-      if items_with_quantity[1]
-        [item, items_with_quantity[1]]
-      else
-        nil
+      if invoice_paid_in_full?(invoice.id)
+        @engine.invoice_items.find_all_by_invoice_id(invoice.id)
       end
-    end.compact
-    binding.pry
-    max = quantities.values.max
-    item_id = quantities.max_by { |k, v| v }
-    @engine.items.find_by_id(item_id[0])
+    end.flatten.compact
+    # Get item ids of invoice_items with quantity in an array of arrays
+    item_ids_with_quantity = invoice_items.map do |invoice_item|
+      [invoice_item.item_id, invoice_item.quantity]
+    end
+    # makes a hash with item id as the key and total quantities as the value
+    items_hash = Hash.new(0) # {item_id => }
+    item_ids_with_quantity.each do |item_with_quantity|
+      items_hash[item_with_quantity[0]] += item_with_quantity[1]
+    end
+    item_id = items_hash.key(items_hash.values.max)
+    @engine.items.find_by_id(item_id)
   end
 end
