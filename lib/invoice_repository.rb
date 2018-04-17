@@ -11,12 +11,9 @@ class InvoiceRepository
     @customer_ids = Hash.new{ |h, k| h[k] = [] }
   end
 
-  def build_elements_hash(elements)
-    elements.each do |element|
-      invoice = Invoice.new(element)
-      @elements[invoice.id] = invoice
-      @merchant_ids[invoice.merchant_id] << invoice
-      @customer_ids[invoice.customer_id] << invoice
+  def build_elements_hash(attributes_list)
+    attributes_list.each do |attributes|
+      generate_invoice(attributes)
     end
   end
 
@@ -33,13 +30,26 @@ class InvoiceRepository
   def create(attributes)
     create_id_number
     attributes[:id] = create_id_number
+    generate_invoice(attributes)
+  end
+
+  def generate_invoice(attributes)
     invoice = Invoice.new(attributes)
-    @elements[create_id_number] = invoice
+    @elements[invoice.id] = invoice
+    @merchant_ids[invoice.merchant_id] << invoice
+    @customer_ids[invoice.customer_id] << invoice
   end
 
   def update(id, attributes)
     super(id, attributes)
     attribute = attributes[:merchant_id]
     @elements[id].attributes[:merchant_id] = attribute if attribute
+  end
+
+  def delete(id)
+    invoice = find_by_id(id)
+    @merchant_ids.delete(invoice.merchant_id)
+    @customer_ids.delete(invoice.customer_id)
+    super(id)
   end
 end
