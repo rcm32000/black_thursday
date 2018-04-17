@@ -12,12 +12,9 @@ class TransactionRepository
 
   end
 
-  def build_elements_hash(elements)
-    elements.each do |element|
-      transaction = Transaction.new(element)
-      @elements[transaction.id] = transaction
-      @invoice_ids[transaction.invoice_id] << transaction
-      @results[transaction.result] << transaction
+  def build_elements_hash(attributes_list)
+    attributes_list.each do |attributes|
+      generate_transaction(attributes)
     end
   end
 
@@ -34,7 +31,20 @@ class TransactionRepository
   def create(attributes)
     create_id_number
     attributes[:id] = create_id_number
+    generate_transaction(attributes)
+  end
+
+  def generate_transaction(attributes)
     transaction = Transaction.new(attributes)
-    @elements[create_id_number] = transaction
+    @elements[transaction.id] = transaction
+    @invoice_ids[transaction.invoice_id] << transaction
+    @results[transaction.result] << transaction
+  end
+
+  def delete(id)
+    transaction = find_by_id(id)
+    @invoice_ids.delete(transaction.invoice_id)
+    @results.delete(transaction.result)
+    super(id)
   end
 end

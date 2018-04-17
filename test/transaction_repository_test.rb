@@ -126,7 +126,7 @@ class TransactionRepositoryTest < Minitest::Test
       result:                       'success',
       created_at:                   time,
       updated_at:                   time
-      )
+    )
     assert_equal 1, @trans.all.count
     assert_equal time, @trans.find_by_id(1).updated_at
 
@@ -137,7 +137,7 @@ class TransactionRepositoryTest < Minitest::Test
       result:                       'failed',
       created_at:                   time,
       updated_at:                   time
-      )
+    )
     assert_equal 2, @trans.all.count
     assert_equal 10, @trans.find_by_id(2).invoice_id
   end
@@ -153,7 +153,7 @@ class TransactionRepositoryTest < Minitest::Test
       result:                       'success',
       created_at:                   time,
       updated_at:                   time
-                )
+    )
     assert_equal 1, @trans.all.count
     assert_equal 8, @trans.find_by_id(1).invoice_id
 
@@ -165,7 +165,7 @@ class TransactionRepositoryTest < Minitest::Test
       result:                       'failed',
       created_at:                   time,
       updated_at:                   time
-                    })
+    })
     assert_equal 1, @trans.all.count
     assert_equal 8, @trans.find_by_id(1).invoice_id
     assert_equal :failed, @trans.find_by_id(1).result
@@ -185,11 +185,40 @@ class TransactionRepositoryTest < Minitest::Test
       result:                       'success',
       created_at:                   time,
       updated_at:                   time
-                )
+    )
     assert_equal 1, @trans.all.count
     assert_equal 8, @trans.find_by_id(1).invoice_id
 
     @trans.delete(1)
     assert_equal 0, @trans.all.count
+  end
+
+  def test_generate_transaction
+    assert_equal 0, @trans.all.count
+    time = Time.now
+    @trans.generate_transaction(
+      id:                           1,
+      invoice_id:                   8,
+      credit_card_number:           '1234567890123456',
+      credit_card_expiration_date:  '0518',
+      result:                       'success',
+      created_at:                   time,
+      updated_at:                   time
+    )
+    assert_equal 1, @trans.all.count
+    assert_equal time, @trans.find_by_id(1).updated_at
+  end
+
+  def test_it_can_find_all_by_invoice_id_after_deletion
+    @trans.from_csv('./test/fixtures/transactions_fixtures.csv')
+    transactions = @trans.find_all_by_invoice_id(3715)
+    assert_instance_of Array, transactions
+    assert_instance_of Transaction, transactions[0]
+    find = @trans.find_by_id(5)
+    assert transactions.include?(find)
+    assert_equal 1, transactions.count
+    @trans.delete(5)
+    transactions = @trans.find_all_by_invoice_id(3715)
+    assert_equal [], transactions
   end
 end
