@@ -48,6 +48,7 @@ class InvoiceRepository
 
   def delete(id)
     invoice = find_by_id(id)
+    return nil unless invoice
     @merchant_ids.delete(invoice.merchant_id)
     @customer_ids.delete(invoice.customer_id)
     super(id)

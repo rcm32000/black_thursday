@@ -37,6 +37,7 @@ class ItemRepository
 
   def delete(id)
     item = find_by_id(id)
+    return nil unless item
     @merchant_ids.delete(item.merchant_id)
     super(id)
   end

@@ -14,19 +14,19 @@ class SalesEngine
               :transactions,
               :customers
 
-  def initialize(attributes)
+  def initialize(attrs)
     @items = ItemRepository.new
-    @items.from_csv(attributes[:items]) if attributes[:items]
+    @items.from_csv(attrs[:items]) if attrs[:items]
     @merchants = MerchantRepository.new
-    @merchants.from_csv(attributes[:merchants]) if attributes[:merchants]
+    @merchants.from_csv(attrs[:merchants]) if attrs[:merchants]
     @invoices = InvoiceRepository.new
-    @invoices.from_csv(attributes[:invoices]) if attributes[:invoices]
+    @invoices.from_csv(attrs[:invoices]) if attrs[:invoices]
     @invoice_items = InvoiceItemRepository.new
-    @invoice_items.from_csv(attributes[:invoice_items]) if attributes[:invoice_items]
+    @invoice_items.from_csv(attrs[:invoice_items]) if attrs[:invoice_items]
     @transactions = TransactionRepository.new
-    @transactions.from_csv(attributes[:transactions]) if attributes[:transactions]
+    @transactions.from_csv(attrs[:transactions]) if attrs[:transactions]
     @customers = CustomerRepository.new
-    @customers.from_csv(attributes[:customers]) if attributes[:customers]
+    @customers.from_csv(attrs[:customers]) if attrs[:customers]
   end
 
   def self.from_csv(attributes)

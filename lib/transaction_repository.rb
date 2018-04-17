@@ -43,6 +43,7 @@ class TransactionRepository
 
   def delete(id)
     transaction = find_by_id(id)
+    return nil unless transaction
     @invoice_ids.delete(transaction.invoice_id)
     @results.delete(transaction.result)
     super(id)
