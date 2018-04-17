@@ -11,12 +11,9 @@ class ItemRepository
 
   end
 
-  def build_elements_hash(elements)
-    elements.each do |element|
-      item = Item.new(element)
-      @elements[item.id] = item
-      @merchant_ids[item.merchant_id] << item
-
+  def build_elements_hash(attributes_list)
+    attributes_list.each do |attributes|
+      generate_item(attributes)
     end
   end
 
@@ -29,7 +26,18 @@ class ItemRepository
   def create(attributes)
     create_id_number
     attributes[:id] = create_id_number
+    generate_item(attributes)
+  end
+
+  def generate_item(attributes)
     item = Item.new(attributes)
-    @elements[create_id_number] = item
+    @elements[item.id] = item
+    @merchant_ids[item.merchant_id] << item
+  end
+
+  def delete(id)
+    item = find_by_id(id)
+    @merchant_ids.delete(item.merchant_id)
+    super(id)
   end
 end
