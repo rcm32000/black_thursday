@@ -159,7 +159,7 @@ class InvoiceItemRepositoryTest < Minitest::Test
       unit_price: BigDecimal.new(1099),
       created_at: time,
       updated_at: time
-                )
+      )
     assert_equal 1, @inv_itr.all.count
     assert_equal 8, @inv_itr.find_by_id(1).invoice_id
 
@@ -169,5 +169,34 @@ class InvoiceItemRepositoryTest < Minitest::Test
 
   def test_it_inspects
     assert_instance_of String, @inv_itr.inspect
+  end
+
+  def test_generate_invoice_item
+    assert_equal 0, @inv_itr.all.count
+    time = Time.now
+    @inv_itr.generate_invoice_item(
+      id:         1,
+      item_id:    7,
+      invoice_id: 8,
+      quantity:   4,
+      unit_price: BigDecimal.new(1099),
+      created_at: time,
+      updated_at: time
+    )
+    assert_equal 1, @inv_itr.all.count
+    assert_equal time, @inv_itr.find_by_id(1).updated_at
+  end
+
+  def test_it_can_find_all_by_item_id_after_deletion
+    @inv_itr.from_csv('./test/fixtures/invoice_items_fixtures.csv')
+    invoice_items = @inv_itr.find_all_by_item_id(263515158)
+    assert_instance_of Array, invoice_items
+    assert_instance_of InvoiceItem, invoice_items[0]
+    find = @inv_itr.find_by_id(5)
+    assert invoice_items.include?(find)
+    assert_equal 1, invoice_items.count
+    @inv_itr.delete(5)
+    invoice_items = @inv_itr.find_all_by_item_id(263515158)
+    assert_equal [], invoice_items
   end
 end

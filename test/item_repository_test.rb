@@ -150,25 +150,25 @@ class ItemRepositoryTest < Minitest::Test
     assert_equal 0, @ir.all.count
     time = Time.now
     @ir.create(
-                name:        'Pencil',
-                description: 'You can use it to write things',
-                unit_price:  BigDecimal.new(10.99, 4),
-                created_at:  time,
-                updated_at:  time,
-                merchant_id: 7
-              )
+      name:        'Pencil',
+      description: 'You can use it to write things',
+      unit_price:  BigDecimal.new(10.99, 4),
+      created_at:  time,
+      updated_at:  time,
+      merchant_id: 7
+    )
     assert_equal 1, @ir.all.count
     assert_equal 'Pencil', @ir.find_by_id(1).name
     assert_equal time, @ir.find_by_id(1).updated_at
 
     @ir.create(
-                name:        'Pen',
-                description: "NASA's response to Russian",
-                unit_price:  BigDecimal.new(0.02, 4),
-                created_at:  time,
-                updated_at:  time,
-                merchant_id: 8
-                )
+      name:        'Pen',
+      description: "NASA's response to Russian",
+      unit_price:  BigDecimal.new(0.02, 4),
+      created_at:  time,
+      updated_at:  time,
+      merchant_id: 8
+    )
     assert_equal 2, @ir.all.count
     assert_equal 'Pen', @ir.find_by_id(2).name
   end
@@ -177,25 +177,25 @@ class ItemRepositoryTest < Minitest::Test
     assert_equal 0, @ir.all.count
     time = Time.now - 1
     @ir.create(
-                name:        'Pencil',
-                description: 'You can use it to write things',
-                unit_price:  BigDecimal.new(10.99, 4),
-                created_at:  time,
-                updated_at:  time,
-                merchant_id: 7
-                )
+      name:        'Pencil',
+      description: 'You can use it to write things',
+      unit_price:  BigDecimal.new(10.99, 4),
+      created_at:  time,
+      updated_at:  time,
+      merchant_id: 7
+    )
     assert_equal 1, @ir.all.count
     assert_equal 'Pencil', @ir.find_by_id(1).name
     assert_equal 7, @ir.find_by_id(1).merchant_id
 
     @ir.update(1, {
-                    name:        'Pen',
-                    description: "NASA's response to Russian",
-                    unit_price:  BigDecimal.new(0.02, 4),
-                    created_at:  time,
-                    updated_at:  time,
-                    merchant_id: 8
-                    })
+      name:        'Pen',
+      description: "NASA's response to Russian",
+      unit_price:  BigDecimal.new(0.02, 4),
+      created_at:  time,
+      updated_at:  time,
+      merchant_id: 8
+    })
     assert_equal 1, @ir.all.count
     assert_equal 'Pen', @ir.find_by_id(1).name
     assert_equal "NASA's response to Russian", @ir.find_by_id(1).description
@@ -207,17 +207,45 @@ class ItemRepositoryTest < Minitest::Test
     assert_equal 0, @ir.all.count
     time = Time.now
     @ir.create(
-                name:        'Pencil',
-                description: 'You can use it to write things',
-                unit_price:  BigDecimal.new(10.99, 4),
-                created_at:  time,
-                updated_at:  time,
-                merchant_id: 7
-                )
+      name:        'Pencil',
+      description: 'You can use it to write things',
+      unit_price:  BigDecimal.new(10.99, 4),
+      created_at:  time,
+      updated_at:  time,
+      merchant_id: 7
+    )
     assert_equal 1, @ir.all.count
     assert_equal 'Pencil', @ir.find_by_id(1).name
 
     @ir.delete(1)
     assert_equal 0, @ir.all.count
+  end
+
+
+  def test_generate_item
+    assert_equal 0, @ir.all.count
+    time = Time.now
+    @ir.generate_item(
+      id:           1,
+      name:        'Pencil',
+      description: 'You can use it to write things',
+      unit_price:  BigDecimal.new(10.99, 4),
+      created_at:  time,
+      updated_at:  time,
+      merchant_id: 7
+    )
+    assert_equal 1, @ir.all.count
+    assert_equal time, @ir.find_by_id(1).updated_at
+  end
+
+  def test_it_can_find_all_by_merchant_id_after_deletion
+    @ir.from_csv('./data/items.csv')
+    items = @ir.find_all_by_merchant_id(12334257)
+    assert_instance_of Array, items
+    find = @ir.find_by_id(263397843)
+    assert items.include?(find)
+    @ir.delete(263397843)
+    items = @ir.find_all_by_merchant_id(12334257)
+    assert_equal [], items
   end
 end

@@ -156,28 +156,54 @@ class InvoiceRepositoryTest < Minitest::Test
       customer_id:  9,
       merchant_id:  18,
       status:       'shipping'
-      })
-      assert_equal 1, @invr.all.count
-      assert_equal :shipping, @invr.find_by_id(1).status
-      assert_equal 18, @invr.find_by_id(1).merchant_id
-      assert_equal 7, @invr.find_by_id(1).customer_id
-      assert time < @invr.find_by_id(1).updated_at
-    end
-
-    def test_it_can_delete_an_existing_invoice
-      assert_equal 0, @invr.all.count
-      time = Time.now
-      @invr.create(
-        customer_id:  7,
-        merchant_id:  8,
-        status:       'pending',
-        created_at:   time,
-        updated_at:   time
-      )
-      assert_equal 1, @invr.all.count
-      assert_equal 7, @invr.find_by_id(1).customer_id
-
-      @invr.delete(1)
-      assert_equal 0, @invr.all.count
-    end
+    })
+    assert_equal 1, @invr.all.count
+    assert_equal :shipping, @invr.find_by_id(1).status
+    assert_equal 18, @invr.find_by_id(1).merchant_id
+    assert_equal 7, @invr.find_by_id(1).customer_id
+    assert time < @invr.find_by_id(1).updated_at
   end
+
+  def test_it_can_delete_an_existing_invoice
+    assert_equal 0, @invr.all.count
+    time = Time.now
+    @invr.create(
+      customer_id:  7,
+      merchant_id:  8,
+      status:       'pending',
+      created_at:   time,
+      updated_at:   time
+    )
+    assert_equal 1, @invr.all.count
+    assert_equal 7, @invr.find_by_id(1).customer_id
+
+    @invr.delete(1)
+    assert_equal 0, @invr.all.count
+  end
+
+  def test_generate_invoice
+    assert_equal 0, @invr.all.count
+    time = Time.now
+    @invr.generate_invoice(
+      id:           1,
+      customer_id:  7,
+      merchant_id:  8,
+      status:       'pending',
+      created_at:   time,
+      updated_at:   time
+    )
+    assert_equal 1, @invr.all.count
+    assert_equal time, @invr.find_by_id(1).updated_at
+  end
+
+  def test_it_can_find_all_by_merchant_id_after_deletion
+    @invr.from_csv('./test/fixtures/invoices_fixtures.csv')
+    invoices = @invr.find_all_by_merchant_id(12334488)
+    assert_instance_of Array, invoices
+    find = @invr.find_by_id(40)
+    assert invoices.include?(find)
+    @invr.delete(40)
+    invoices = @invr.find_all_by_merchant_id(12334488)
+    assert_equal [], invoices
+  end
+end

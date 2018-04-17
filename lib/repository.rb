@@ -7,10 +7,10 @@ module Repository
 
   def from_csv(csv)
     records = CSV.read(csv, headers: true)
-    elements = (0..(records.count - 1)).to_a.map do |index|
+    attributes_list = (0..(records.count - 1)).to_a.map do |index|
       set_element_hash(records, index)
     end
-    build_elements_hash(elements)
+    build_elements_hash(attributes_list)
   end
 
   def set_element_hash(records, index)
