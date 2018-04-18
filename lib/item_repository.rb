@@ -8,7 +8,6 @@ class ItemRepository
   def initialize
     @elements = {}
     @merchant_ids = Hash.new{ |h, k| h[k] = [] }
-
   end
 
   def build_elements_hash(attributes_list)
