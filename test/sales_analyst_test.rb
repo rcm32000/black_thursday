@@ -351,4 +351,19 @@ class SalesAnalystTest < Minitest::Test
     assert_instance_of Item, actual
     assert_equal se.items.find_by_id(263396463), actual
   end
+
+  def test_it_returns_items_bought_in_year_for_customer
+    se = SalesEngine.from_csv(
+      invoices:   './data/invoices.csv',
+      invoice_items: './data/invoice_items.csv',
+      items: './data/items.csv',
+      customers: './data/customers.csv',
+      transactions: './data/transactions.csv'
+      )
+    actual = se.analyst.items_bought_in_year(400, 2002)
+    assert_instance_of Array, actual
+    assert_instance_of Item, actual[0]
+    assert_equal 263549742, actual[0].id
+    assert_equal 2, actual.length
+  end
 end

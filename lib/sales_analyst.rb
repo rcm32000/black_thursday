@@ -319,7 +319,7 @@ class SalesAnalyst
   end
 
   def one_time_buyers_top_item
-    invoices = get_invoices_from_one_time_buyers
+    invoices = get_invoices_for_customers(one_time_buyers)
     invoice_items = get_invoice_items_from_invoices(invoices)
     item_ids_with_quantity = get_item_ids_with_quantity(invoice_items)
     items_hash = item_ids_with_total_quantity(item_ids_with_quantity)
@@ -327,8 +327,8 @@ class SalesAnalyst
     @engine.items.find_by_id(item_id)
   end
 
-  def get_invoices_from_one_time_buyers
-    one_time_buyers.map do |customer|
+  def get_invoices_for_customers(customers)
+    customers.map do |customer|
       @engine.invoices.find_all_by_customer_id(customer.id)
     end.flatten
   end
@@ -353,5 +353,11 @@ class SalesAnalyst
       items_hash[item_with_quantity[0]] += item_with_quantity[1]
     end
     items_hash
+  end
+
+  def items_bought_in_year(customer_id, year)
+    customers = [@engine.customers.find_by_id(customer_id)]
+    invoices = get_invoices_for_customers(customers)
+    
   end
 end
