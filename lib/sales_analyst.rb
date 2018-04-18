@@ -358,6 +358,12 @@ class SalesAnalyst
   def items_bought_in_year(customer_id, year)
     customers = [@engine.customers.find_by_id(customer_id)]
     invoices = get_invoices_for_customers(customers)
-    
+    invoices_for_year = invoices.find_all do |invoice|
+      invoice.created_at.year == year
+    end
+    invoice_items = get_invoice_items_from_invoices(invoices_for_year)
+    invoice_items.map do |invoice_item|
+      @engine.items.find_by_id(invoice_item.item_id)
+    end
   end
 end
