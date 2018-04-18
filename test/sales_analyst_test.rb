@@ -455,7 +455,7 @@ class SalesAnalystTest < Minitest::Test
     actual = se.analyst.highest_volume_items(200)
     assert_instance_of Array, actual
     assert_instance_of Item, actual[0]
-    assert_equal 6, acual.length
+    assert_equal 6, actual.length
     assert_equal 263420195, actual[0].id
   end
 end

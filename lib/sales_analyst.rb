@@ -346,8 +346,7 @@ class SalesAnalyst
   end
 
   def items_bought_in_year(customer_id, year)
-    customers = [@engine.customers.find_by_id(customer_id)]
-    invoices = get_invoices_for_customers(customers)
+    invoices = @engine.invoices.find_all_by_customer_id(customer_id)
     invoices_for_year = invoices.find_all do |invoice|
       invoice.created_at.year == year
     end
@@ -357,7 +356,21 @@ class SalesAnalyst
     end
   end
 
-  def highest_volume_items
-    
+  def highest_volume_items(customer_id)
+    invoices = @engine.invoices.find_all_by_customer_id(customer_id)
+    invoice_items = invoices.map do |invoice|
+      @engine.invoice_items.find_all_by_invoice_id(invoice.id)
+    end.flatten.compact
+    quantities = get_item_ids_with_quantity(invoice_items)
+    item_ids_by_quantity = item_ids_with_total_quantity(quantities).to_a
+    max = item_ids_by_quantity.max_by do |item_id_with_quantity|
+      item_id_with_quantity[1]
+    end[1]
+    max_item_ids_with_quantity = item_ids_by_quantity.find_all do |iidwq|
+      iidwq[1] == max
+    end
+    max_item_ids_with_quantity.map do |item_id_with_quantity|
+      @engine.items.find_by_id(item_id_with_quantity[0])
+    end
   end
 end
