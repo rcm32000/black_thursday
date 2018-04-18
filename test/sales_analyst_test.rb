@@ -298,6 +298,20 @@ class SalesAnalystTest < Minitest::Test
     assert_equal 478, actual[-1].id
   end
 
+  def test_customers_ranked_by_revenue
+    se = SalesEngine.from_csv(
+      invoices:   './data/invoices.csv',
+      invoice_items: './data/invoice_items.csv',
+      customers: './data/customers.csv',
+      transactions: './data/transactions.csv'
+    )
+    actual = se.analyst.customers_ranked_by_revenue
+    assert_instance_of Array, actual
+    assert_instance_of Customer, actual[0]
+    assert_equal 313, actual[0].id
+    assert_instance_of Customer, actual[-1]
+  end
+
   def test_it_returns_twenty_customers_by_default
     se = SalesEngine.from_csv(
       invoices:   './data/invoices.csv',
@@ -320,10 +334,30 @@ class SalesAnalystTest < Minitest::Test
       invoice_items: './data/invoice_items.csv',
       customers: './data/customers.csv',
       merchants: './data/merchants.csv'
-      )
+    )
     actual = se.analyst.top_merchant_for_customer(100)
     assert_instance_of Merchant, actual
     assert_equal 12336753, actual.id
+  end
+
+  def test_quantities_for_grouped_invoices
+    se = SalesEngine.from_csv(
+      invoices:   './data/invoices.csv',
+      invoice_items: './data/invoice_items.csv',
+      customers: './data/customers.csv',
+      transactions: './data/transactions.csv',
+      merchants: './data/merchants.csv'
+    )
+    invoices = se.invoices.all[0..3].group_by(&:merchant_id)
+    quantities = se.analyst.quantities_for_grouped_invoices(invoices)
+    expected = { 47 => 12335938, 21 => 12334753, 52 => 12335955, 5 => 12334269 }
+    assert_instance_of Hash, quantities
+    assert_equal expected, quantities
+  end
+
+  def test_total_quantity_for_invoices
+    quantity = @sa.total_quantity_for_invoices(@sa.engine.invoices.all)
+    assert_equal 267, quantity
   end
 
   def test_it_returns_one_time_buyers
@@ -346,10 +380,53 @@ class SalesAnalystTest < Minitest::Test
       items: './data/items.csv',
       customers: './data/customers.csv',
       transactions: './data/transactions.csv'
-      )
+    )
     actual = se.analyst.one_time_buyers_top_item
     assert_instance_of Item, actual
     assert_equal se.items.find_by_id(263396463), actual
+  end
+
+  def test_get_invoices_for_customers
+    se = SalesEngine.from_csv(
+      invoices:   './data/invoices.csv',
+      invoice_items: './data/invoice_items.csv',
+      items: './data/items.csv',
+      customers: './data/customers.csv',
+      transactions: './data/transactions.csv'
+    )
+    customers = se.customers.all[50..75]
+    actual = se.analyst.get_invoices_for_customers(customers)
+    assert_instance_of Array, actual
+    assert_instance_of Invoice, actual[0]
+    assert_equal 123, actual.count
+  end
+
+  def test_get_invoice_items_from_invoices
+    se = SalesEngine.from_csv(
+      invoices:   './data/invoices.csv',
+      invoice_items: './data/invoice_items.csv',
+      items: './data/items.csv',
+      customers: './data/customers.csv',
+      transactions: './data/transactions.csv'
+    )
+    invoices = se.invoices.all[50..80]
+    actual = se.analyst.get_invoice_items_from_invoices(invoices)
+    assert_instance_of Array, actual
+    assert_instance_of InvoiceItem, actual[0]
+    assert_equal 94, actual.count
+  end
+
+  def test_get_item_ids_with_quantity
+    invoice_items = @sa.engine.invoice_items.all[0..3]
+    actual = @sa.get_item_ids_with_quantity(invoice_items)
+    expected = [[263519844, 5], [263454779, 9], [263451719, 8], [263542298, 3]]
+    assert_equal expected, actual
+  end
+
+  def test_item_ids_with_total_quantity
+    items_hash = @sa.item_ids_with_total_quantity([[1, 3], [2, 7], [1, 2]])
+    expected = { 1 => 5, 2 => 7 }
+    assert_equal expected, items_hash
   end
 
   def test_it_returns_items_bought_in_year_for_customer
@@ -359,11 +436,26 @@ class SalesAnalystTest < Minitest::Test
       items: './data/items.csv',
       customers: './data/customers.csv',
       transactions: './data/transactions.csv'
-      )
+    )
     actual = se.analyst.items_bought_in_year(400, 2002)
     assert_instance_of Array, actual
     assert_instance_of Item, actual[0]
     assert_equal 263549742, actual[0].id
     assert_equal 2, actual.length
+  end
+
+  def test_highest_volume_items
+    se = SalesEngine.from_csv(
+      invoices:   './data/invoices.csv',
+      invoice_items: './data/invoice_items.csv',
+      items: './data/items.csv',
+      customers: './data/customers.csv',
+      transactions: './data/transactions.csv'
+    )
+    actual = se.analyst.highest_volume_items(200)
+    assert_instance_of Array, actual
+    assert_instance_of Item, actual[0]
+    assert_equal 6, acual.length
+    assert_equal 263420195, actual[0].id
   end
 end

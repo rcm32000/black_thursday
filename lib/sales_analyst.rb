@@ -63,16 +63,14 @@ class SalesAnalyst
   end
 
   def item_unit_price_standard_deviation
-    items = @engine.items.all.map do |item|
-      item.unit_price
-    end
+    items = @engine.items.all.map(&:unit_price)
     average = average_item_cost
     standard_deviation(items, average)
   end
 
   def standard_deviation(elements, average)
     deviation_sum = elements.reduce(0) do |sum, element|
-      sum += (element.to_f - average).abs**2
+      sum + (element.to_f - average).abs**2
     end
     divided_deviation = deviation_sum / (elements.count - 1)
     Math.sqrt(divided_deviation).round(2).to_f
@@ -357,5 +355,9 @@ class SalesAnalyst
     invoice_items.map do |invoice_item|
       @engine.items.find_by_id(invoice_item.item_id)
     end
+  end
+
+  def highest_volume_items
+    
   end
 end
