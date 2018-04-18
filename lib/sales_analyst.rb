@@ -32,27 +32,24 @@ class SalesAnalyst
 
   def average_item_price_for_merchant(merchant_id)
     items = @engine.items.find_all_by_merchant_id(merchant_id)
-    total_cost = 0.0
-    items.each do |item|
-      total_cost += item.unit_price
+    total_cost = items.reduce(0.0) do |total, item|
+      total + item.unit_price
     end
     (total_cost / items.count).round(2)
   end
 
   def average_average_price_per_merchant
     merchants = @engine.merchants.all
-    total_cost = 0.0
-    merchants.each do |merchant|
-      total_cost += average_item_price_for_merchant(merchant.id)
+    total_cost = merchants.reduce(0.0) do |total, merchant|
+      total + average_item_price_for_merchant(merchant.id)
     end
     (total_cost / merchants.count).round(2)
   end
 
   def average_item_cost
     items = @engine.items.all
-    total_cost = 0.0
-    items.each do |item|
-      total_cost += item.unit_price
+    total_cost = items.reduce(0.0) do |total, item|
+      total + item.unit_price
     end
     (total_cost / items.count).round(2)
   end
@@ -74,9 +71,8 @@ class SalesAnalyst
   end
 
   def standard_deviation(elements, average)
-    deviation_sum = 0
-    elements.each do |element|
-      deviation_sum += (element.to_f - average).abs**2
+    deviation_sum = elements.reduce(0) do |sum, element|
+      sum += (element.to_f - average).abs**2
     end
     divided_deviation = deviation_sum / (elements.count - 1)
     Math.sqrt(divided_deviation).round(2).to_f
@@ -173,22 +169,18 @@ class SalesAnalyst
 
   def invoice_total(invoice_id)
     invoice_items = @engine.invoice_items.find_all_by_invoice_id(invoice_id)
-    total = 0
-    invoice_items.each do |invoice_item|
-      total += invoice_item.unit_price * invoice_item.quantity
+    invoice_items.reduce(0) do |total, invoice_item|
+      total + invoice_item.unit_price * invoice_item.quantity
     end
-    total
   end
 
   def total_revenue_by_date(date)
     invoices = @engine.invoices.all.find_all do |invoice|
       invoice.created_at == date
     end
-    total = 0
-    invoices.each do |invoice|
-      total += invoice_total(invoice.id)
+    invoices.reduce(0) do |total, invoice|
+      total + invoice_total(invoice.id)
     end
-    total
   end
 
   def top_revenue_earners(num = 20)
